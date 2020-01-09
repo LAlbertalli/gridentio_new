@@ -2,6 +2,7 @@
   "name": "gridentio_new",
   "version": "0.1.0",
   "private": true,
+  "homepage" : "http://lalbertalli.github.io/gridentio_new",
   "dependencies": {
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.4.0",
