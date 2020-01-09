@@ -5,7 +5,7 @@ import './index.css';
 const BOARD_WIDTH = 5;
 const BOARD_HEIGHT = 5;
 
-function Square(props) {
+const Square = React.forwardRef((props, ref) => {
   let bgCol;
   switch(props.value){
     case 1:
@@ -28,20 +28,24 @@ function Square(props) {
       onMouseLeave={props.onMouseLeave}
       onMouseUp={props.onMouseUp}
       onMouseDown={props.onMouseDown}
+      ref = {ref}
     >
       {props.value}
     </button>
   );
-}
+});
 
 class Board extends React.Component {
   constructor(props) {
     super(props);
+    this.forwardRefs = [];
     let squares = Array(BOARD_HEIGHT);
     for (var i = squares.length - 1; i >= 0; i--) {
       squares[i] = Array(BOARD_WIDTH);
+      this.forwardRefs[i]=[];
       for (var j = squares[i].length - 1; j >= 0; j--) {
         squares[i][j] = rand123();
+        this.forwardRefs[i][j] = null;
       }
     }
     this.state = {
@@ -49,6 +53,65 @@ class Board extends React.Component {
       trace: [],
       points: 0,
     };
+    this.lastTouch = {
+      x: -1,
+      y: -1,
+      type: null,
+    }
+  }
+
+  handleTouch(type,event) {
+    const touch = event.touches[0];
+    let x=-1;
+    let y=-1;
+    let squares = 0;
+    if (touch){
+      for (var i = 0; i < this.forwardRefs.length; i++){
+        for (var j = 0; j < this.forwardRefs[i].length; j++){
+          const node = this.forwardRefs[i][j].current;
+          if (node && touch){
+            const boundingClientRect = node.getBoundingClientRect();
+            if ((boundingClientRect.left <= touch.clientX) &&
+              (touch.clientX< boundingClientRect.right) &&
+              (boundingClientRect.top <= touch.clientY) &&
+              (touch.clientY < boundingClientRect.bottom)){
+                x = i;
+                y = j;
+                squares++;
+            }
+          }
+        }
+      }
+    } else {
+      x = this.lastTouch[x];
+      y = this.lastTouch[y];
+    }
+    if (this.lastTouch[x] === x &&
+      this.lastTouch[y] === y &&
+      this.lastTouch[type] === type)
+      return;
+    this.lastTouch = {
+      x:x,
+      y:y,
+      type: type,
+    }
+    let mtype;
+    switch(type) {
+      case "start":
+        mtype = "down";
+        break;
+      case "move":
+        mtype = "enter";
+        break
+      case "end":
+      case "cancel":
+      default:
+        mtype = "up";
+        break;
+    }
+    this.handleMouse(x,y,mtype);
+    if (squares>1)
+      console.log("Error: tracked more than one row", event, i, j, squares);
   }
 
   handleMouse(x,y,event) {
@@ -62,6 +125,7 @@ class Board extends React.Component {
       }
     } else {
       if (x === -1 && y === -1) {
+        console.log("out");
         event = "up";
       }
       const last = this.state.trace[this.state.trace.length - 1];
@@ -162,14 +226,15 @@ class Board extends React.Component {
     return false;
   }
 
-  renderSquare(x,y) {
+  renderSquare(x,y,ref) {
     return <Square 
         value={this.state.squares[x][y]}
         highlight={this.isInTrace(x, y) > -1} 
         onMouseEnter={() => this.handleMouse(x,y,"enter")}
         onMouseUp={() => this.handleMouse(x,y,"up")}
-        onMouseDown={() => this.handleMouse(x,y,"down")} 
+        onMouseDown={() => this.handleMouse(x,y,"down")}
         key={x + "_" + y}
+        ref={ref}
       />;
   }
 
@@ -178,7 +243,9 @@ class Board extends React.Component {
     for (var i = 0; i < BOARD_HEIGHT; i++) {
       let row = [];
       for (var j = 0; j < BOARD_WIDTH; j++) {
-        row.push(this.renderSquare(i,j));
+        const ref = React.createRef();
+        row.push(this.renderSquare(i,j,ref));
+        this.forwardRefs[i][j] = ref;
       }
       board.push(<div className="board-row" key={i.toString()}>
         {row}
@@ -188,9 +255,19 @@ class Board extends React.Component {
     return (
       <div>
         <div className="status">{status}</div>
-        <div onMouseLeave={() => this.handleMouse(-1,-1,"leave")}>
-          {board}
+        <div className="game-board-inner">
+          <div
+            className="board"
+            onMouseLeave={() => this.handleMouse(-1,-1,"leave")}
+            onTouchStart={(event) => this.handleTouch("start",event)}
+            onTouchMove={(event) => this.handleTouch("move",event)}
+            onTouchEnd={(event) => this.handleTouch("end",event)}
+            onTouchCancel={(event) => this.handleTouch("cancel",event)}
+            >
+            {board}
+          </div>
         </div>
+        <div className="clear"/>
       </div>
     );
   }
