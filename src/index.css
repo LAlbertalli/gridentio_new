@@ -87,3 +87,21 @@ ol, ul {
   font-size: 24px;
   font-weight: bold;
 }
+
+.new-game-btn {
+  background: #fff;
+  border: 2px solid #000;
+  float: left;
+  font-size: 32px;
+  font-weight: bold;
+  line-height: 48px;
+  margin-right: 0px;
+  margin-top: 0px;
+  padding: 4;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.new-game-btn:hover {
+  background: rgb(205, 155, 255);
+}

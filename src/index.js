@@ -35,6 +35,14 @@ const Square = React.forwardRef((props, ref) => {
   );
 });
 
+function NewGameButton(props) {
+  return (
+    <button
+      className="new-game-btn"
+      onClick={props.onClick}
+    >New Game!</button>);
+}
+
 class Board extends React.Component {
   constructor(props) {
     super(props);
@@ -53,6 +61,29 @@ class Board extends React.Component {
       trace: [],
       points: 0,
     };
+    this.lastTouch = {
+      x: -1,
+      y: -1,
+      type: null,
+    }
+  }
+
+  restartGame() {
+    this.forwardRefs = [];
+    let squares = Array(BOARD_HEIGHT);
+    for (var i = squares.length - 1; i >= 0; i--) {
+      squares[i] = Array(BOARD_WIDTH);
+      this.forwardRefs[i]=[];
+      for (var j = squares[i].length - 1; j >= 0; j--) {
+        squares[i][j] = rand123();
+        this.forwardRefs[i][j] = null;
+      }
+    }
+    this.setState({
+      squares: squares,
+      trace: [],
+      points: 0,
+    });
     this.lastTouch = {
       x: -1,
       y: -1,
@@ -125,7 +156,6 @@ class Board extends React.Component {
       }
     } else {
       if (x === -1 && y === -1) {
-        console.log("out");
         event = "up";
       }
       const last = this.state.trace[this.state.trace.length - 1];
@@ -251,10 +281,14 @@ class Board extends React.Component {
         {row}
       </div>);
     }
-    const status = (this.hasMoreMoves() ? "Points: " : "Match ended. Points: ") + this.state.points;
+    const hasMoreMoves = this.hasMoreMoves() ;
+    const status = (hasMoreMoves ? "Points: " : "Match ended. Points: ") + this.state.points;
+    const newGame = hasMoreMoves ? [] : [<NewGameButton
+          onClick={()=>this.restartGame()}
+          key = "newGame"
+        />];
     return (
       <div>
-        <div className="status">{status}</div>
         <div className="game-board-inner">
           <div
             className="board"
@@ -266,8 +300,10 @@ class Board extends React.Component {
             >
             {board}
           </div>
+          <div className="clear"/>
         </div>
-        <div className="clear"/>
+        <div className="status">{status}</div>
+        {newGame}
       </div>
     );
   }
