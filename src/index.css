@@ -86,6 +86,7 @@ ol, ul {
   clear: both;
   font-size: 24px;
   font-weight: bold;
+  max-width: 720px;
 }
 
 .new-game-btn {
@@ -104,4 +105,16 @@ ol, ul {
 
 .new-game-btn:hover {
   background: rgb(205, 155, 255);
+}
+
+.pre-board {
+  border: 2px solid #000;
+  clear: both;
+  display: table;
+  margin-bottom: 24px;
+}
+
+.explanation{
+  font-size: 18px;
+  font-weight: normal;
 }

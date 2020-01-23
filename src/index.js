@@ -4,6 +4,7 @@ import './index.css';
 
 const BOARD_WIDTH = 5;
 const BOARD_HEIGHT = 5;
+const PREVIEW = 5;
 
 const Square = React.forwardRef((props, ref) => {
   let bgCol;
@@ -56,10 +57,15 @@ class Board extends React.Component {
         this.forwardRefs[i][j] = null;
       }
     }
+    let preBoard = Array(PREVIEW);
+    for (i = preBoard.length - 1; i >= 0; i--) {
+      preBoard[i] = rand123();
+    }
     this.state = {
       squares: squares,
       trace: [],
       points: 0,
+      preBoard : preBoard,
     };
     this.lastTouch = {
       x: -1,
@@ -79,10 +85,15 @@ class Board extends React.Component {
         this.forwardRefs[i][j] = null;
       }
     }
+    let preBoard = Array(PREVIEW);
+    for (i = preBoard.length - 1; i >= 0; i--) {
+      preBoard[i] = rand123();
+    }
     this.setState({
       squares: squares,
       trace: [],
       points: 0,
+      preBoard : preBoard,
     });
     this.lastTouch = {
       x: -1,
@@ -177,9 +188,14 @@ class Board extends React.Component {
             this.setState({trace: []});
             break;
           }
-          const [points, squares] = this.calculatePoints();
+          const [points, squares, preBoard] = this.calculatePoints();
           if (squares !== null)
-            this.setState({trace: [], points: this.state.points + points, squares: squares});
+            this.setState({
+                trace: [], 
+                points: this.state.points + points, 
+                squares: squares,
+                preBoard: preBoard,
+              });
           else
             this.setState({trace: []});
           break;
@@ -212,6 +228,7 @@ class Board extends React.Component {
   calculatePoints(){
     const trace = this.state.trace;
     const squares = this.state.squares;
+    const new_preBoard = this.state.preBoard.slice();
     if (trace.length === 0 || trace.length === 1){
       return [0, null];
     }
@@ -234,10 +251,11 @@ class Board extends React.Component {
       }
     }
     for (i = 0; i < trace.length-1; i++) {
-      new_squares[trace[i]['x']][trace[i]['y']] = rand123();
+      new_squares[trace[i]['x']][trace[i]['y']] = new_preBoard.pop();
+      new_preBoard.unshift(rand123());
     }
     new_squares[trace[trace.length-1]['x']][trace[trace.length-1]['y']] = points;
-    return [points, new_squares];
+    return [points, new_squares, new_preBoard];
   }
 
   hasMoreMoves(){
@@ -268,6 +286,13 @@ class Board extends React.Component {
       />;
   }
 
+  renderPreSquare(i) {
+    return <Square 
+        value={this.state.preBoard[i]}
+        key={"idx_" + i}
+      />;
+  }
+
   render() {
     let board = [];
     for (var i = 0; i < BOARD_HEIGHT; i++) {
@@ -281,6 +306,10 @@ class Board extends React.Component {
         {row}
       </div>);
     }
+    let preBoard = [];
+    for (i = PREVIEW-1; i >= 0; i--) {
+      preBoard.push(this.renderPreSquare(i));
+    }
     const hasMoreMoves = this.hasMoreMoves() ;
     const status = (hasMoreMoves ? "Points: " : "Match ended. Points: ") + this.state.points;
     const newGame = hasMoreMoves ? [] : [<NewGameButton
@@ -289,6 +318,10 @@ class Board extends React.Component {
         />];
     return (
       <div>
+        <div
+          className="pre-board">
+          {preBoard}
+        </div>
         <div className="game-board-inner">
           <div
             className="board"
@@ -314,7 +347,10 @@ class Game extends React.Component {
     return (
       <div className="game">
         <div className="game-info">
-          Game inspired by <a href="https://gridentify.com/">Gridentify</a> with few changes.
+          <p>Game inspired by <a href="https://gridentify.com/">Gridentify</a> with few changes.</p>
+          <p className="explanation">Draw on equal number on the {BOARD_WIDTH} by {BOARD_HEIGHT} below. 
+          The last number you select get replaced by the sum of the number you selected. 
+          The others get pulled from the preview row on top (left to right).</p>
         </div>
         <div className="game-board">
           <Board />
