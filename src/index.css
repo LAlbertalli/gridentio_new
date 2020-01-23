@@ -27,7 +27,6 @@ ol, ul {
   background: #fff;
   border: 2px solid #000;
   float: left;
-  font-size: 48px;
   font-weight: bold;
   line-height: 34px;
   height: 64px;
@@ -36,6 +35,18 @@ ol, ul {
   padding: 0;
   text-align: center;
   width: 64px;
+}
+
+.number-sz1 {
+  font-size: 40px;
+}
+
+.number-sz2 {
+  font-size: 28px;
+}
+
+.number-sz3 {
+  font-size: 20px;
 }
 
 .highlight {

@@ -22,9 +22,18 @@ const Square = React.forwardRef((props, ref) => {
       bgCol = "bg-col4";
       break;
   }
+
+  let ftSiz = "number-sz1";
+  if (props.value/1000>=1){
+    ftSiz = "number-sz3";
+  }
+  else if (props.value/100>=1){
+    ftSiz = "number-sz2";
+  }
+
   return (
     <button 
-      className = {"square " + (props.highlight ? "highlight" : bgCol)}
+      className = {"square " + ftSiz + " " + (props.highlight ? "highlight" : bgCol)}
       onMouseEnter={props.onMouseEnter}
       onMouseLeave={props.onMouseLeave}
       onMouseUp={props.onMouseUp}
