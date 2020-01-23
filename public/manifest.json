@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Modified Gridentify",
+  "name": "Gridentify inspired game with next tile preview",
   "icons": [
     {
       "src": "favicon.ico",
